@@ -16,8 +16,7 @@ export default function EvaluationsDashboard() {
     setLoading(true);
     setError(null);
     try {
-      // Points directly to your live FastAPI background container url
-      const res = await fetch('http://localhost:8000/projects/prj_invoice_demo/evaluations');
+      const res = await fetch('/api/evaluations');
       if (!res.ok) {
         throw new Error(`Request failed with status ${res.status}`);
       }
