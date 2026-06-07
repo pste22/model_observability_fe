@@ -1,18 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
+import { proxyToBackend } from '../../lib/proxy';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
-    try {
-      const upstream = await fetch(`${BACKEND_URL}/projects`, {
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await upstream.json();
-      res.status(upstream.status).json(data);
-    } catch (err) {
-      res.status(502).json({ detail: 'Backend unreachable' });
-    }
+    await proxyToBackend(req, res, '/projects', { method: 'GET' });
     return;
   }
 
@@ -22,15 +13,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  try {
-    const upstream = await fetch(`${BACKEND_URL}/projects/create-from-sandbox`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body),
-    });
-    const data = await upstream.json();
-    res.status(upstream.status).json(data);
-  } catch (err) {
-    res.status(502).json({ detail: 'Backend unreachable' });
-  }
+  await proxyToBackend(req, res, '/projects/create-from-sandbox', {
+    method: 'POST',
+    body: req.body,
+  });
 }

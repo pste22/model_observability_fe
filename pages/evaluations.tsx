@@ -6,13 +6,41 @@ import { SummaryGrid } from '../components/evaluations/SummaryGrid';
 import { ProjectData } from '../types/evaluations';
 
 export default function EvaluationsDashboard() {
-  const [activeProjectId, setActiveProjectId] = useState('prj_invoice_demo');
+  const [activeProjectId, setActiveProjectId] = useState('');
+  const [projectsResolved, setProjectsResolved] = useState(false);
   const [data, setData] = useState<ProjectData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
+  // Resolve the caller's own projects and default to their first one, instead
+  // of assuming a shared demo project (which belongs to another tenant).
+  useEffect(() => {
+    let active = true;
+    fetch('/api/projects')
+      .then((res) => (res.ok ? res.json() : { projects: [] }))
+      .then((json) => {
+        if (!active) return;
+        const first = json.projects?.[0]?.id ?? '';
+        setActiveProjectId(first);
+      })
+      .catch(() => {
+        if (active) setActiveProjectId('');
+      })
+      .finally(() => {
+        if (active) setProjectsResolved(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const fetchEvaluations = async () => {
+    if (!activeProjectId) {
+      setData(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -31,8 +59,9 @@ export default function EvaluationsDashboard() {
   };
 
   useEffect(() => {
+    if (!projectsResolved) return;
     fetchEvaluations();
-  }, [activeProjectId]);
+  }, [activeProjectId, projectsResolved]);
 
   const toggleRow = (id: string) => {
     setExpandedRow(expandedRow === id ? null : id);

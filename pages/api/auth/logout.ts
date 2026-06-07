@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { proxyToBackend } from '../../lib/proxy';
+import { proxyToBackend } from '../../../lib/proxy';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -7,6 +7,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(405).json({ detail: 'Method not allowed' });
     return;
   }
-
-  await proxyToBackend(req, res, '/sandbox/evaluate', { method: 'POST', body: req.body });
+  await proxyToBackend(req, res, '/auth/logout', { method: 'POST' });
 }
