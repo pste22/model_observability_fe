@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import Link from 'next/link';
-import { Layers, RefreshCw, Beaker } from 'lucide-react';
+import { Layers, RefreshCw, Beaker, CalendarClock } from 'lucide-react';
 
 interface EvaluationsHeaderProps {
   projectName?: string;
@@ -18,6 +18,12 @@ export function EvaluationsHeader({ projectName, onRefresh }: EvaluationsHeaderP
         <p className="text-xs font-mono text-slate-400 mt-1">Active Space: {projectName}</p>
       </div>
       <div className="flex items-center gap-2">
+        <Link
+          href="/lifecycle"
+          className="flex items-center gap-2 px-3 py-2 bg-slate-900 border border-slate-800 hover:bg-slate-800 rounded-lg transition text-sm font-semibold text-slate-300"
+        >
+          <CalendarClock className="w-4 h-4" /> Model Lifecycle
+        </Link>
         <Link
           href="/playground"
           className="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg transition text-sm font-semibold text-white"
