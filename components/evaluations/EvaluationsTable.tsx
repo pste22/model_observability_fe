@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { AlertCircle, AlertTriangle, Code2, Gauge, Wrench, ChevronDown, ChevronUp } from 'lucide-react';
 import { Evaluation } from '../../types/evaluations';

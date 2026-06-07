@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
@@ -13,6 +12,7 @@ import {
   Layers,
   Save,
 } from 'lucide-react';
+import { SandboxResult, PromoteResult, ModelsResponse } from '../types/sandbox';
 
 // Fallback list used only if the live /api/models lookup fails.
 const FALLBACK_MODELS = [
@@ -28,7 +28,7 @@ const DEFAULT_SCHEMA = '{\n  "invoice_id": "string",\n  "total": "number"\n}';
 const DEFAULT_PROMPT = 'Extract the invoice fields from the document and return JSON.';
 const DEFAULT_CONTEXT = 'Invoice #INV-2025-014\nVendor: Acme Corp\nAmount due: $1,250.00';
 
-function statusClass(status) {
+function statusClass(status: string) {
   if (status === 'PASSED') return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
   if (status === 'WARNING_DRIFT') return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
   return 'bg-red-500/10 text-red-400 border border-red-500/20';
@@ -41,17 +41,17 @@ export default function PlaygroundPage() {
   const [legacyModel, setLegacyModel] = useState('gpt-4o-mini');
   const [successorModel, setSuccessorModel] = useState('claude-3-haiku-20240307');
 
-  const [modelOptions, setModelOptions] = useState(FALLBACK_MODELS);
+  const [modelOptions, setModelOptions] = useState<string[]>(FALLBACK_MODELS);
   const [modelsLoading, setModelsLoading] = useState(true);
-  const [modelsError, setModelsError] = useState(null);
+  const [modelsError, setModelsError] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [result, setResult] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<SandboxResult | null>(null);
 
   const [promoting, setPromoting] = useState(false);
-  const [promoteError, setPromoteError] = useState(null);
-  const [promoted, setPromoted] = useState(null);
+  const [promoteError, setPromoteError] = useState<string | null>(null);
+  const [promoted, setPromoted] = useState<PromoteResult | null>(null);
   const [projectName, setProjectName] = useState('');
   const [groundTruthText, setGroundTruthText] = useState('');
 
@@ -61,7 +61,7 @@ export default function PlaygroundPage() {
       setModelsError(null);
       try {
         const res = await fetch('/api/models');
-        const json = await res.json();
+        const json: ModelsResponse & { detail?: string } = await res.json();
         if (!res.ok) {
           throw new Error(json.detail || `Request failed with status ${res.status}`);
         }
@@ -76,7 +76,7 @@ export default function PlaygroundPage() {
         if (providerErrors.length > 0) {
           setModelsError(providerErrors.join(' · '));
         }
-      } catch (e) {
+      } catch (e: any) {
         setModelsError(e.message || 'Could not load models; using fallback list.');
       } finally {
         setModelsLoading(false);
@@ -122,7 +122,7 @@ export default function PlaygroundPage() {
       } catch (e) {
         setGroundTruthText(json?.legacy_raw || '{}');
       }
-    } catch (e) {
+    } catch (e: any) {
       setError(e.message || 'Evaluation failed. Please try again.');
     } finally {
       setLoading(false);
@@ -174,7 +174,7 @@ export default function PlaygroundPage() {
         throw new Error(json.detail || `Request failed with status ${res.status}`);
       }
       setPromoted(json);
-    } catch (e) {
+    } catch (e: any) {
       setPromoteError(e.message || 'Could not promote to a project. Please try again.');
     } finally {
       setPromoting(false);
@@ -366,7 +366,7 @@ export default function PlaygroundPage() {
                 <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold ${statusClass(evaluation.status)}`}>
                   {evaluation.status}
                 </span>
-                <span className={`text-2xl font-extrabold ${evaluation.score_pct > 80 ? 'text-emerald-400' : 'text-red-400'}`}>
+                <span className={`text-2xl font-extrabold ${(evaluation.score_pct ?? 0) > 80 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {evaluation.score_pct?.toFixed(1)}%
                 </span>
                 {evaluation.metrics?.format_drift ? (

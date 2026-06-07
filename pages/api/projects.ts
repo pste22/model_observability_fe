@@ -3,8 +3,21 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'GET') {
+    try {
+      const upstream = await fetch(`${BACKEND_URL}/projects`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await upstream.json();
+      res.status(upstream.status).json(data);
+    } catch (err) {
+      res.status(502).json({ detail: 'Backend unreachable' });
+    }
+    return;
+  }
+
   if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
+    res.setHeader('Allow', 'GET, POST');
     res.status(405).json({ detail: 'Method not allowed' });
     return;
   }

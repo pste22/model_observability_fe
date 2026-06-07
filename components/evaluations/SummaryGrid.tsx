@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { TrendingDown } from 'lucide-react';
 import { ProjectData } from '../../types/evaluations';
